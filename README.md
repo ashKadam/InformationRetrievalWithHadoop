@@ -1,5 +1,5 @@
 # InformationRetrievalWithHadoop
-###Information Retrieval using Map-Reduce technique in Hadoop
+##Information Retrieval using Map-Reduce technique in Hadoop
 
 Information retrieval (IR) is concerned with finding material (e.g., documents) of an
 unstructured nature (usually text) in response to an information need (e.g., a query) from
@@ -52,3 +52,108 @@ documents. It is often used as a weighting factor in information retrieval and t
   
   **TF-IDF(t, d) = WF(t,d) * IDF(t)**  (equation#4)
   
+  
+  
+  **Following are the instructions to execute the programs.**
+
+Here onwards please consider below notations:
+* input_path -> /user/cloudera/input ------- input folder has all 8 input files
+* output_path -> /user/cloudera/output ----- final result will be written in output folder
+* intermediate_path -> /user/cloudera/intern_file  ----- intermediate results from termFrequency to TFIDF
+* tfInter_path -> /user/cloudera/tfInter ----- first intermediate results (input for TFIDF) while searching
+* idfInter_path -> /user/cloudera/idfInter ----- next intermediate results (input for Search) while searching
+
+Note: Instructions are written in the context of HDFS. All input and output files are stored on HDFS. 
+      While running any program again, please clear the output path (delete all earlier intermediate and output files)
+
+1. DocWordCount.java
+   This file takes input files and list down all words with their count as output.
+   Compile and create jar file. Run program using this jar and passing input and output path. 
+   Then store results in required output file.
+   
+   	 javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* DocWordCount.java -d build -Xlint
+     
+   	 jar -cvf docwordcount.jar -C build/ .
+     
+   	 hadoop jar docwordcount.jar org.myorg.DocWordCount <input_path> <output_path>
+     
+   	 hadoop fs -cat <output_path> > DocWordCount.out
+     
+   
+2. TermFrequency.java
+
+   This file takes input files and list down all words with their term frequency and file name as output.
+   Compile and create jar file. Run program using this jar and passing input and output path. 
+   Then store results in required output file.    
+   
+   	javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* TermFrequency.java -d build -Xlint
+    
+   	jar -cvf termfrequency.jar -C build/ .
+    
+   	hadoop jar termfrequency.jar org.myorg.TermFrequency <input_path> <output_path>
+    
+   	hadoop fs -cat <output_path> > TermFrequency.out
+    
+
+3. TFIDF.java
+
+   This file takes input files and list down all words with their tfidf values and their file names as output.
+   We are using chaing here as we arre using output of term frequency as input for TFIDF. 
+   Compile and create jar file. Run program using this jar and passing input and output path. 
+   Then store results in required output file.    
+   
+   	javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* TermFrequency.java TFIDF.java -d build -Xlint
+    
+   	jar -cvf tfidf.jar -C build/ .
+    
+   	hadoop jar tfidf.jar org.myorg.TFIDF <input_path> <inmtermediate_file> <output_path>
+    
+   	hadoop fs -cat <output_path> > TFIDF.out
+    
+
+4. Search.java
+
+   This file takes input files and list down file with thier TFIDF for matching query word/token. 
+   Compile and create jar file. Run program using this jar and passing input and output path. 
+   Then store results in required output file.    
+   
+   	javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* Search.java -d build -Xlint
+    
+   	jar -cvf search.jar -C build/ .
+    
+   	hadoop jar search.jar org.myorg.Search <input_path> <output_path> <user_query>
+    
+   	hadoop fs -cat <output_path> > query1.out
+    
+
+*** Before running second query, please delete /user/clouder/output, /user/cloudera/intermediate1 and /user/cloudera/searchintermediate1.
+
+5. Rank.java
+
+   This file takes input files and list down all files with dreaseing TFIDF values. 
+   Compile and create jar file. Run program using this jar and passing input and output path. 
+   Then store results in required output file.    
+   
+   	javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* Rank.java -d build -Xlint
+    
+   	jar -cvf rank.jar -C build/ .
+    
+   	hadoop jar rank.jar org.myorg.Rank <input_path> <output_path> <user_query>
+    
+   	hadoop fs -cat <output_path> > query1-rank.out
+    
+
+
+Additionally, we have Search_withchaining. java and corresponding output. Similar command structure is used 
+as that of TFIDF. 
+
+    javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* TermFrequency.java TFIDF.java SearchWithchaining.java -d build -Xlint
+    
+  	 jar -cvf searchwithchaining.jar -C build/ .
+    
+   	hadoop jar searchwithchaining.jar org.myorg.SearchWithChaining <input_path> <tfIntern path> <idfIntern path><output_path> <user_query>
+    
+   	hadoop fs -cat <output_path> > query1-chaining.out
+    
+
+
